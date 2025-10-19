@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Plan of Salvation</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <header>
+        <h1 id="main-title">The Plan of Salvation</h1>
+        <div id="language-switch">
+            <img src="images/flag-en.png" alt="English" class="flag" data-lang="en">
+            <img src="images/flag-it.png" alt="Italiano" class="flag" data-lang="it">
+        </div>
+    </header>
+
+    <main id="scroll-container">
+        <!-- Each section will be generated dynamically -->
+    </main>
+
+    <div id="nav-buttons">
+        <button id="prev-btn">◀</button>
+        <button id="next-btn">▶</button>
+    </div>
+
+    <!-- Scripture Modal -->
+    <div id="modal" class="hidden">
+        <div id="modal-content">
+            <span id="close-modal">&times;</span>
+            <h2 id="modal-title"></h2>
+            <p id="modal-text"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
