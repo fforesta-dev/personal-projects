@@ -271,24 +271,21 @@ button.scripture-btn:hover {
     .section {
         height: auto;
         min-height: 100vh;
-        padding: 6rem 1.5rem 5rem 1.5rem;
-        /* extra top/bottom spacing */
+        padding: 6rem 1.5rem 6rem 1.5rem;
         justify-content: flex-start;
+        overflow-y: auto;
+        /* allow vertical scroll */
     }
 
-    /* Images shrink more on mobile */
     .section img {
         width: 80%;
-        max-width: 240px;
+        max-width: 250px;
         height: auto;
+        margin-bottom: 1rem;
     }
 
-    /* Adjust nav arrows to bottom corners */
     #nav-buttons {
-        top: auto;
         bottom: 5rem;
-        transform: none;
-        padding: 0 1.5rem;
     }
 
     /* Make arrows smaller */
@@ -301,7 +298,6 @@ button.scripture-btn:hover {
     /* Keep indicators visible and spaced from bottom */
     #slide-indicators {
         bottom: 1rem;
-        gap: 8px;
     }
 
     /* Make text slightly smaller for long paragraphs */
