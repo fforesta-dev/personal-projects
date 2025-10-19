@@ -6,13 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Plan of Salvation</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a237e">
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("sw.js")
+                    .then(() => console.log("✅ Service Worker registered"))
+                    .catch(err => console.log("Service Worker registration failed:", err));
+            });
+        }
+    </script>
 </head>
 
 <body>
     <header>
         <h1 id="main-title">The Plan of Salvation</h1>
         <div id="language-switch">
-            <img src="images/flag-en.png" alt="English" class="flag" data-lang="en">
+            <img src="images/flag-us.png" alt="English" class="flag" data-lang="en">
             <img src="images/flag-it.png" alt="Italiano" class="flag" data-lang="it">
         </div>
     </header>
@@ -21,10 +32,16 @@
         <!-- Each section will be generated dynamically -->
     </main>
 
+    <div id="update-banner" class="hidden">
+        <span id="update-text">🔄 A new version is available.</span>
+        <button id="refresh-btn">Refresh</button>
+    </div>
+
     <div id="nav-buttons">
         <button id="prev-btn">◀</button>
         <button id="next-btn">▶</button>
     </div>
+    <div id="slide-indicators"></div>
 
     <!-- Scripture Modal -->
     <div id="modal" class="hidden">
