@@ -291,3 +291,36 @@ button.scripture-btn:hover {
 .hidden {
     display: none;
 }
+
+/* ===== MOBILE FIXES ===== */
+@media (max-width: 768px) {
+
+    /* Move arrows to bottom so they don’t overlap text */
+    #nav-buttons {
+        position: absolute;
+        /* relative to scrollable section */
+        top: auto;
+        bottom: 5rem;
+        /* just above indicators */
+        transform: none;
+        pointer-events: all;
+    }
+
+    /* Slightly smaller padding in sections to fit buttons and indicators */
+    .section {
+        padding-bottom: 8rem;
+        /* room for arrows + dots */
+    }
+
+    /* Center buttons horizontally */
+    #nav-buttons button {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+    }
+
+    /* Keep dots visible and nicely spaced */
+    #slide-indicators {
+        bottom: 1.2rem;
+    }
+}
