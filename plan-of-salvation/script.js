@@ -70,6 +70,22 @@ function updateIndicators() {
     });
 }
 
+// ========== SWIPE / SCROLL SYNC ==========
+const scrollContainer = document.getElementById('scroll-container');
+
+let scrollTimeout;
+scrollContainer.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const sections = document.querySelectorAll('.section');
+        const newIndex = Math.round(scrollContainer.scrollLeft / scrollContainer.clientWidth);
+        if (newIndex !== currentSection) {
+            currentSection = newIndex;
+            updateIndicators();
+        }
+    }, 80);
+});
+
 // ========== MODAL ==========
 function openModal(title, text) {
     const modal = document.getElementById('modal');
