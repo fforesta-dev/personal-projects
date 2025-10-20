@@ -11,9 +11,10 @@ function loadLanguage(lang) {
             currentLang = lang;
             renderSections();
             renderIndicators();
+            adjustLayoutForOverflow();
             document.getElementById('main-title').innerText = data.title;
 
-            // 🔄 Update bilingual banner text dynamically
+            // bilingual banner text
             const updateText = document.getElementById('update-text');
             const refreshBtn = document.getElementById('refresh-btn');
             if (updateText && refreshBtn) {
@@ -37,13 +38,12 @@ function renderSections() {
       <p class="scripture">"${sec.scripture}"</p>
       <button class="scripture-btn" onclick="openModal('${sec.title}','${sec.modalText}')">
         ${data.readMore}
-      </button>
-    `;
+      </button>`;
         container.appendChild(div);
     });
 }
 
-// ========== RENDER INDICATORS ==========
+// ========== INDICATORS ==========
 function renderIndicators() {
     const indicatorContainer = document.getElementById('slide-indicators');
     indicatorContainer.innerHTML = '';
@@ -60,11 +60,7 @@ function renderIndicators() {
 function goToSection(index) {
     const sections = document.querySelectorAll('.section');
     currentSection = index;
-    sections[currentSection].scrollIntoView({
-        behavior: 'smooth',
-        inline: 'start',
-        block: 'nearest'
-    });
+    sections[currentSection].scrollIntoView({ behavior: 'smooth', inline: 'start' });
     updateIndicators();
 }
 
@@ -86,14 +82,13 @@ document.getElementById('close-modal').addEventListener('click', () => {
     document.getElementById('modal').classList.remove('active');
 });
 
-// NEW: click outside the box to close
 document.getElementById('modal').addEventListener('click', (e) => {
     if (e.target.id === 'modal') {
         document.getElementById('modal').classList.remove('active');
     }
 });
 
-// ========== FLAG SWITCH ==========
+// ========== FLAGS ==========
 document.querySelectorAll('.flag').forEach(flag => {
     flag.addEventListener('click', () => loadLanguage(flag.dataset.lang));
 });
@@ -103,25 +98,14 @@ document.getElementById('next-btn').addEventListener('click', () => {
     const sections = document.querySelectorAll('.section');
     if (currentSection < sections.length - 1) {
         currentSection++;
-        sections[currentSection].scrollIntoView({
-            behavior: 'smooth',
-            inline: 'start',
-            block: 'nearest'
-        });
-        updateIndicators();
+        goToSection(currentSection);
     }
 });
 
 document.getElementById('prev-btn').addEventListener('click', () => {
-    const sections = document.querySelectorAll('.section');
     if (currentSection > 0) {
         currentSection--;
-        sections[currentSection].scrollIntoView({
-            behavior: 'smooth',
-            inline: 'start',
-            block: 'nearest'
-        });
-        updateIndicators();
+        goToSection(currentSection);
     }
 });
 
@@ -129,9 +113,7 @@ document.getElementById('prev-btn').addEventListener('click', () => {
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then((reg) => {
         console.log("✅ Service Worker registered");
-
         if (reg.waiting) showUpdateBanner(reg);
-
         reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
@@ -140,7 +122,6 @@ if ('serviceWorker' in navigator) {
                 }
             });
         });
-
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
@@ -159,7 +140,20 @@ function showUpdateBanner(reg) {
     });
 }
 
+// ========== ADJUST LAYOUT FOR LONG CONTENT ==========
+function adjustLayoutForOverflow() {
+    const sections = document.querySelectorAll('.section');
+    const viewportHeight = window.innerHeight;
+    sections.forEach(section => {
+        const contentHeight = section.scrollHeight;
+        const paddingBottom = contentHeight > viewportHeight ? 120 : 60;
+        section.style.paddingBottom = `${paddingBottom}px`;
+    });
+}
+window.addEventListener('resize', adjustLayoutForOverflow);
+
 // ========== INITIALIZE ==========
 window.addEventListener('DOMContentLoaded', () => {
     loadLanguage(currentLang);
+    adjustLayoutForOverflow();
 });
