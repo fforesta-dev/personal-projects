@@ -85,7 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 currentSection = newIndex;
                 updateIndicators();
             }
-        }, 80);
+        }, 20);
     });
 });
 
