@@ -58,37 +58,36 @@ header {
 /* ====== SCROLLABLE CONTAINER ====== */
 #scroll-container {
     height: 100vh;
-    overflow-y: hidden;
-    overflow-x: auto;
     display: flex;
     flex-direction: row;
+    overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
 }
 
+/* ====== INDIVIDUAL SECTIONS ====== */
 .section {
     min-width: 100%;
     height: 100vh;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 6rem 2rem 5rem 2rem;
     box-sizing: border-box;
-}
-
-.section {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    /* ✅ allow vertical scroll inside section */
 }
 
 .section img {
-    width: 280px;
-    max-width: 80%;
+    width: 80%;
+    max-width: 300px;
+    height: auto;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .section h2 {
@@ -110,7 +109,8 @@ header {
 }
 
 button.scripture-btn {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
     background: #1a237e;
     color: white;
     border: none;
