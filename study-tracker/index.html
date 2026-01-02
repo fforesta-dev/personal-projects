@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Study Tracker</h1>
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalCredits">0</span>
+                    <span class="stat-label">Total Credits</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="earnedCredits">0</span>
+                    <span class="stat-label">Earned Credits</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="inProgressCredits">0</span>
+                    <span class="stat-label">In Progress</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" onclick="showTab('subjects')">Subjects</button>
+            <button class="tab-button" onclick="showTab('certificates')">Certificates</button>
+            <button class="tab-button" onclick="showTab('manage')">Manage</button>
+        </nav>
+
+        <main>
+            <!-- Subjects Tab -->
+            <div id="subjects-tab" class="tab-content active">
+                <div class="controls">
+                    <div class="filter-group">
+                        <label for="statusFilter">Filter by Status:</label>
+                        <select id="statusFilter" onchange="filterSubjects()">
+                            <option value="all">All Subjects</option>
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="search-group">
+                        <label for="searchSubjects">Search:</label>
+                        <input type="text" id="searchSubjects" placeholder="Search subjects..."
+                            oninput="filterSubjects()">
+                    </div>
+                </div>
+
+                <div id="subjects-list" class="subjects-grid">
+                    <!-- Subjects will be populated here -->
+                </div>
+            </div>
+
+            <!-- Certificates Tab -->
+            <div id="certificates-tab" class="tab-content">
+                <h2>Available Certificates</h2>
+                <div id="certificates-list" class="certificates-grid">
+                    <!-- Certificates will be populated here -->
+                </div>
+            </div>
+
+            <!-- Manage Tab -->
+            <div id="manage-tab" class="tab-content">
+                <div class="manage-section">
+                    <h2>Add New Subject</h2>
+                    <form id="add-subject-form" class="form-grid">
+                        <div class="form-group">
+                            <label for="subjectCode">Subject Code:</label>
+                            <input type="text" id="subjectCode" placeholder="e.g., PC101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subjectName">Subject Name:</label>
+                            <input type="text" id="subjectName" placeholder="e.g., Life Skills" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subjectCredits">Credits:</label>
+                            <input type="number" id="subjectCredits" min="1" max="10" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="subjectPrereqs">Prerequisites (comma-separated codes):</label>
+                            <input type="text" id="subjectPrereqs" placeholder="e.g., MATH110, ENG111">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Subject</button>
+                    </form>
+                </div>
+
+                <div class="manage-section">
+                    <h2>Data Management</h2>
+                    <p class="storage-info">💾 <strong>File-Based Storage:</strong> Your data is automatically saved to
+                        files. Use Save to File regularly to backup your progress!</p>
+                    <div class="button-group">
+                        <button onclick="saveToFile()" class="btn btn-primary">💾 Save to File</button>
+                        <button onclick="loadFromFile()" class="btn btn-secondary">📁 Load from File</button>
+                        <button onclick="exportData()" class="btn btn-secondary">📤 Export Backup</button>
+                        <button onclick="resetData()" class="btn btn-danger">🔄 Reset All Data</button>
+                    </div>
+                    <input type="file" id="import-file" accept=".json" style="display: none;"
+                        onchange="handleImportFile(event)">
+                    <input type="file" id="load-file" accept=".json" style="display: none;"
+                        onchange="handleLoadFile(event)">
+                </div>
+
+                <div class="manage-section">
+                    <h2>Edit Placeholder Subjects</h2>
+                    <p class="edit-info">ℹ️ To modify the default subjects, edit the <code>defaultSubjects</code> array
+                        in script.js (lines 6-70).</p>
+                    <div class="button-group">
+                        <button onclick="showPlaceholderHelp()" class="btn btn-secondary">📝 Show Editing Guide</button>
+                        <button onclick="resetToDefaults()" class="btn btn-secondary">🔧 Reset to Default
+                            Subjects</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
