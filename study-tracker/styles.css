@@ -35,7 +35,7 @@
 
 .password-container p {
     margin-bottom: 25px;
-    color: #666;
+    color: #fff;
     font-size: 1rem;
 }
 
@@ -118,7 +118,7 @@ header h1 {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 20px;
     border-radius: 10px;
@@ -157,10 +157,12 @@ header h1 {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
+    color: #212529;
 }
 
 .tab-button:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(102, 126, 234, 0.2);
+    color: #212529;
 }
 
 .tab-button.active {
@@ -199,7 +201,7 @@ header h1 {
 .filter-group label,
 .search-group label {
     font-weight: 600;
-    color: #555;
+    color: #212529;
 }
 
 .filter-group select,
@@ -267,11 +269,11 @@ header h1 {
 .subject-code {
     font-weight: bold;
     font-size: 1.1rem;
-    color: #495057;
+    color: #212529;
 }
 
 .subject-credits {
-    background: #667eea;
+    background: #495057;
     color: white;
     padding: 4px 8px;
     border-radius: 20px;
@@ -281,7 +283,7 @@ header h1 {
 
 .subject-name {
     font-size: 1rem;
-    color: #6c757d;
+    color: #495057;
     margin-bottom: 15px;
 }
 
@@ -316,33 +318,35 @@ header h1 {
 }
 
 .status-btn.in-progress.active {
-    background: #ffc107;
-    color: #333;
+    background: #e6a800;
+    color: #000;
 }
 
 .status-btn.not-started.active {
-    background: #6c757d;
+    background: #495057;
+    color: white;
 }
 
 .status-btn:not(.active) {
-    background: #e9ecef;
-    color: #6c757d;
+    background: #dee2e6;
+    color: #212529;
 }
 
 .status-btn:not(.active):hover {
-    background: #dee2e6;
+    background: #ced4da;
+    color: #000;
 }
 
 .prereqs {
     margin-top: 10px;
     font-size: 0.85rem;
-    color: #6c757d;
+    color: #495057;
 }
 
 .prereq-tag {
     display: inline-block;
-    background: #e9ecef;
-    color: #495057;
+    background: #dee2e6;
+    color: #212529;
     padding: 2px 8px;
     border-radius: 10px;
     margin-right: 5px;
@@ -356,7 +360,7 @@ header h1 {
 }
 
 .prereq-tag.missing {
-    background: #f8d7da;
+    background: #f5c6cb;
     color: #721c24;
 }
 
@@ -387,10 +391,11 @@ header h1 {
 }
 
 .certificate-progress {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     padding: 8px 12px;
     border-radius: 20px;
     font-size: 0.9rem;
+    color: white;
 }
 
 .certificate-subjects {
@@ -404,15 +409,17 @@ header h1 {
 
 .subject-requirement {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     padding: 4px 8px;
     border-radius: 12px;
     margin: 2px;
     font-size: 0.8rem;
+    color: white;
 }
 
 .subject-requirement.completed {
-    background: rgba(40, 167, 69, 0.8);
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
 }
 
 .certificate-actions {
@@ -443,9 +450,9 @@ header h1 {
 }
 
 .cert-btn.requested {
-    background: #ffc107;
-    border-color: #ffc107;
-    color: #333;
+    background: #e6a800;
+    border-color: #e6a800;
+    color: #000;
 }
 
 .cert-btn.received {
@@ -513,12 +520,12 @@ header h1 {
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: #495057;
     color: white;
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: #343a40;
     transform: translateY(-2px);
 }
 
@@ -540,12 +547,12 @@ header h1 {
 
 .storage-info,
 .edit-info {
-    background: #e7f3ff;
-    border: 1px solid #b3d9ff;
+    background: #cfe2ff;
+    border: 1px solid #6ea8fe;
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 20px;
-    color: #0056b3;
+    color: #212529;
     font-size: 0.9rem;
 }
 
@@ -582,7 +589,7 @@ header h1 {
 
 .manage-section h2 {
     margin-bottom: 20px;
-    color: #495057;
+    color: #212529;
 }
 
 .blocked-message {

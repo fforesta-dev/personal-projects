@@ -987,22 +987,86 @@ function renderCertificates() {
                     
                     ${progress.creditRequirements ? `
                         <h4>Credit Requirements:</h4>
-                        ${progress.creditRequirements.map(req => {
+                        ${progress.creditRequirements.map((req, index) => {
             if (req.type === 'religion') {
                 const religionCredits = subjects
                     .filter(s => s.code.startsWith('REL') && s.status === 'completed')
                     .reduce((total, s) => total + s.credits, 0);
                 const isCompleted = religionCredits >= req.minCredits;
-                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${religionCredits}/${req.minCredits} credits</span>`;
+                const displayCredits = Math.min(religionCredits, req.minCredits);
+                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${displayCredits}/${req.minCredits} credits</span>`;
             } else if (req.type === 'religion-cornerstone' || req.type === 'religion-elective' ||
                 req.type === 'pathwayconnect' || req.type === 'web-computer-programming-cert' ||
                 req.type === 'web-development-cert' || req.type === 'general-education') {
+
+                // Calculate available credits considering exclusions
+                const displayUsedCourses = new Set();
+
+                // Process requirements in order to calculate what's available for this specific requirement
+                const sortedReqs = progress.creditRequirements.sort((a, b) => {
+                    if (a.type === 'religion-cornerstone') return -1;
+                    if (b.type === 'religion-cornerstone') return 1;
+                    return 0;
+                });
+
+                for (let i = 0; i < sortedReqs.length; i++) {
+                    const currentReq = sortedReqs[i];
+                    if (currentReq === req) break; // Stop when we reach the current requirement
+
+                    if (currentReq.type === 'religion-cornerstone' || currentReq.type === 'religion-elective' ||
+                        currentReq.type === 'pathwayconnect' || currentReq.type === 'web-computer-programming-cert' ||
+                        currentReq.type === 'web-development-cert' || currentReq.type === 'general-education') {
+
+                        const prevAvailableSubjects = subjects.filter(s =>
+                            currentReq.courses.includes(s.code) &&
+                            s.status === 'completed' &&
+                            !displayUsedCourses.has(s.code)
+                        );
+
+                        const prevCreditsEarned = prevAvailableSubjects.reduce((total, s) => total + s.credits, 0);
+
+                        // Always allocate available credits to higher priority requirements, even if not fully satisfied
+                        if (prevCreditsEarned > 0) {
+                            let creditsToTake = Math.min(prevCreditsEarned, currentReq.minCredits);
+                            prevAvailableSubjects.forEach(s => {
+                                if (creditsToTake > 0) {
+                                    displayUsedCourses.add(s.code);
+                                    creditsToTake -= s.credits;
+                                }
+                            });
+                        }
+                    }
+                }
+
+                // Now calculate available credits for current requirement
                 const availableSubjects = subjects.filter(s =>
-                    req.courses.includes(s.code) && s.status === 'completed'
+                    req.courses.includes(s.code) &&
+                    s.status === 'completed' &&
+                    !displayUsedCourses.has(s.code)
                 );
                 const creditsEarned = availableSubjects.reduce((total, s) => total + s.credits, 0);
                 const isCompleted = creditsEarned >= req.minCredits;
-                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${creditsEarned}/${req.minCredits} credits</span>`;
+                const displayCredits = Math.min(creditsEarned, req.minCredits);
+
+                // Show which courses are being used for religion requirements
+                let courseDetails = '';
+                if (req.type === 'religion-cornerstone' || req.type === 'religion-elective') {
+                    const usedCourses = [];
+                    let creditsToTake = Math.min(creditsEarned, req.minCredits);
+                    availableSubjects.forEach(s => {
+                        if (creditsToTake > 0) {
+                            usedCourses.push(s.code);
+                            creditsToTake -= s.credits;
+                        }
+                    });
+                    if (usedCourses.length > 0) {
+                        courseDetails = `<br><small style="color: #fff;">Using: ${usedCourses.join(', ')}</small>`;
+                    } else if (availableSubjects.length === 0 && req.type === 'religion-elective') {
+                        courseDetails = `<br><small style="color: #fff;">No remaining courses (all allocated to cornerstone)</small>`;
+                    }
+                }
+
+                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${displayCredits}/${req.minCredits} credits${courseDetails}</span>`;
             }
             return '';
         }).join('')}
@@ -1061,8 +1125,12 @@ function getCertificateProgress(certificate) {
     if (certificate.creditRequirements) {
         creditTotal = certificate.creditRequirements.length;
 
-        // First pass: handle requirements that exclude others
-        const sortedReqs = certificate.creditRequirements.sort(req => req.excludeUsedIn ? -1 : 1);
+        // Process requirements in order: cornerstone first, then electives
+        const sortedReqs = certificate.creditRequirements.sort((a, b) => {
+            if (a.type === 'religion-cornerstone') return -1;
+            if (b.type === 'religion-cornerstone') return 1;
+            return 0;
+        });
 
         creditCompleted = sortedReqs.filter(req => {
             if (req.type === 'religion') {
@@ -1073,6 +1141,7 @@ function getCertificateProgress(certificate) {
             } else if (req.type === 'religion-cornerstone' || req.type === 'religion-elective' ||
                 req.type === 'pathwayconnect' || req.type === 'web-computer-programming-cert' ||
                 req.type === 'web-development-cert' || req.type === 'general-education') {
+
                 const availableSubjects = subjects.filter(s =>
                     req.courses.includes(s.code) &&
                     s.status === 'completed' &&
@@ -1081,12 +1150,16 @@ function getCertificateProgress(certificate) {
 
                 const creditsEarned = availableSubjects.reduce((total, s) => total + s.credits, 0);
 
-                if (creditsEarned >= req.minCredits) {
-                    // Mark courses as used if this requirement excludes others
-                    if (!req.excludeUsedIn) {
-                        availableSubjects.forEach(s => usedCourses.add(s.code));
-                    }
-                    return true;
+                // Always allocate available credits to higher priority requirements, even if not fully satisfied
+                if (creditsEarned > 0) {
+                    let creditsToTake = Math.min(creditsEarned, req.minCredits);
+                    availableSubjects.forEach(s => {
+                        if (creditsToTake > 0) {
+                            usedCourses.add(s.code);
+                            creditsToTake -= s.credits;
+                        }
+                    });
+                    return creditsEarned >= req.minCredits; // Only count as completed if fully satisfied
                 }
             }
             return false;
