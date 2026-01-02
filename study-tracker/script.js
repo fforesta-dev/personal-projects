@@ -1,8 +1,76 @@
-// Application state
 let subjects = [];
 let certificates = [];
 
-// Default data with placeholder subjects and certificates
+const APP_PASSWORD_HASH = '02216e382eb7455f0622559e724c375a1fd69fa51ad6d0629dfb379c8d97cbbb';
+
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + 'study-tracker-salt');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function generatePasswordHash(password) {
+    const hash = await hashPassword(password);
+    console.log(`Password hash for "${password}": ${hash}`);
+    return hash;
+}
+
+async function checkPassword() {
+    const inputPassword = document.getElementById('password-input').value;
+    const errorDiv = document.getElementById('password-error');
+
+    try {
+        const inputHash = await hashPassword(inputPassword);
+
+        if (inputHash === APP_PASSWORD_HASH) {
+            document.getElementById('password-overlay').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+
+            sessionStorage.setItem('study-tracker-authenticated', 'true');
+
+            initializeApp();
+        } else {
+            errorDiv.textContent = '❌ Incorrect password. Access denied.';
+            document.getElementById('password-input').value = '';
+            document.getElementById('password-input').focus();
+        }
+    } catch (error) {
+        errorDiv.textContent = '❌ Authentication error. Please try again.';
+    }
+}
+
+function checkAuthentication() {
+    if (sessionStorage.getItem('study-tracker-authenticated') === 'true') {
+        document.getElementById('password-overlay').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        initializeApp();
+    } else {
+        document.getElementById('password-input').focus();
+    }
+}
+
+function initializeApp() {
+    loadData();
+    updateStats();
+    renderSubjects();
+    renderCertificates();
+
+    document.getElementById('add-subject-form').addEventListener('submit', handleAddSubject);
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    checkAuthentication();
+
+    document.getElementById('password-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            checkPassword();
+        }
+    });
+});
+
 const defaultSubjects = [
     {
         id: 'pc101',
@@ -28,7 +96,7 @@ const defaultSubjects = [
         name: 'Professional Skills',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['PC101'],
         order: 3
     },
     {
@@ -37,7 +105,7 @@ const defaultSubjects = [
         name: 'Jesus Christ & His Everlasting Gospel',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL250A'],
         order: 4
     },
     {
@@ -46,7 +114,7 @@ const defaultSubjects = [
         name: 'University Skills',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['PC101', 'PC102'],
         order: 5
     },
     {
@@ -55,7 +123,7 @@ const defaultSubjects = [
         name: 'Introduction to Programming',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['PC102'],
         order: 6
     },
     {
@@ -73,7 +141,7 @@ const defaultSubjects = [
         name: 'Programming with Functions',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['CSEPC110'],
         order: 8
     },
     {
@@ -91,7 +159,7 @@ const defaultSubjects = [
         name: 'Dynamic Web Fundamentals',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['WDD130', 'CSEPC110'],
         order: 10
     },
     {
@@ -100,16 +168,16 @@ const defaultSubjects = [
         name: 'Teachings and Doctrine of the Book of Mormon',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL275A'],
         order: 11
     },
     {
         id: 'wdd231',
         code: 'WDD231',
-        name: 'Web Frontend Development 1',
+        name: 'Web Frontend Development I',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['WDD131'],
         order: 12
     },
     {
@@ -118,7 +186,7 @@ const defaultSubjects = [
         name: 'Programming with Classes',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['CSE111'],
         order: 13
     },
     {
@@ -136,7 +204,10 @@ const defaultSubjects = [
         name: 'Career Development',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            type: 'any',
+            courses: ['OSH450', 'BUS180', 'ART235', 'FCS340', 'BUS119', 'SPED360', 'WDD230', 'WDD231', 'AUTO332', 'AUTO232', 'PUBH320', 'HS320', 'ME272', 'BUS210', 'ECON150', 'COMM150', 'HTMBC240', 'SMMBC160', 'CSE210', 'FIN102', 'BUS233', 'MCO203A', 'IT235', 'ACC208', 'SCM223', 'GSO223', 'SMM130', 'FHGEN242']
+        },
         order: 15
     },
     {
@@ -163,16 +234,19 @@ const defaultSubjects = [
         name: 'Foundations of the Restoration',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL225A'],
         order: 18
     },
     {
         id: 'wdd330',
         code: 'WDD330',
-        name: 'Web Frontend Development 2',
+        name: 'Web Frontend Development II',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            type: 'any',
+            courses: ['WDD230', 'WDD231']
+        },
         order: 19
     },
     {
@@ -190,7 +264,18 @@ const defaultSubjects = [
         name: 'Web Backend Development',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            groups: [
+                {
+                    type: 'any',
+                    courses: ['WDD230', 'WDD231', 'CS213']
+                },
+                {
+                    type: 'all',
+                    courses: ['ITM111']
+                }
+            ]
+        },
         order: 21
     },
     {
@@ -208,7 +293,7 @@ const defaultSubjects = [
         name: 'Web Services',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['CSE340'],
         order: 23
     },
     {
@@ -217,7 +302,7 @@ const defaultSubjects = [
         name: 'The Eternal Family',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL200A'],
         order: 24
     },
     {
@@ -226,7 +311,7 @@ const defaultSubjects = [
         name: 'Web Full-Stack Development',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['WDD330', 'CSE340'],
         order: 25
     },
     {
@@ -253,7 +338,18 @@ const defaultSubjects = [
         name: 'Advanced Writing in Professional Contexts',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            groups: [
+                {
+                    type: 'any',
+                    courses: ['WRIT101', 'ENG150']
+                },
+                {
+                    type: 'credits',
+                    minCredits: 22
+                }
+            ]
+        },
         order: 28
     },
     {
@@ -271,7 +367,7 @@ const defaultSubjects = [
         name: 'Teachings of the Living Prophets',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL333A'],
         order: 30
     },
     {
@@ -280,7 +376,10 @@ const defaultSubjects = [
         name: 'Programming with Data Structures',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            type: 'any',
+            courses: ['CSE210']
+        },
         order: 31
     },
     {
@@ -298,7 +397,18 @@ const defaultSubjects = [
         name: 'Software Testing',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            groups: [
+                {
+                    type: 'any',
+                    courses: ['CSE111', 'CIT124']
+                },
+                {
+                    type: 'all',
+                    courses: ['CSE212']
+                }
+            ]
+        },
         order: 33
     },
     {
@@ -316,7 +426,18 @@ const defaultSubjects = [
         name: 'Applied Programming',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            groups: [
+                {
+                    type: 'any',
+                    courses: ['CSE111', 'CIT124']
+                },
+                {
+                    type: 'all',
+                    courses: ['CSE212']
+                }
+            ]
+        },
         order: 35
     },
     {
@@ -334,7 +455,7 @@ const defaultSubjects = [
         name: '.NET Software Development',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['CSE210', 'WDD130', 'WDD430'],
         order: 37
     },
     {
@@ -343,7 +464,7 @@ const defaultSubjects = [
         name: 'The Divine Gift of Forgiveness',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL290A'],
         order: 38
     },
     {
@@ -370,7 +491,7 @@ const defaultSubjects = [
         name: 'Software Engineering Principles',
         credits: 2,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['CSE310'],
         order: 41
     },
     {
@@ -379,7 +500,18 @@ const defaultSubjects = [
         name: 'Professional Readiness',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            groups: [
+                {
+                    type: 'all',
+                    courses: ['CSE212']
+                },
+                {
+                    type: 'credits',
+                    minCredits: 45
+                }
+            ]
+        },
         order: 42
     },
     {
@@ -388,7 +520,7 @@ const defaultSubjects = [
         name: 'Answering My Gospel Questions',
         credits: 1,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: ['REL280A'],
         order: 43
     },
     {
@@ -397,7 +529,10 @@ const defaultSubjects = [
         name: 'Senior Project',
         credits: 3,
         status: 'not-started',
-        prerequisites: [],
+        prerequisites: {
+            type: 'any',
+            courses: ['CSE310', 'CS246']
+        },
         order: 44
     },
     {
@@ -415,61 +550,109 @@ const defaultCertificates = [
     {
         id: 'pathway-connect',
         name: 'PathwayConnect Certificate',
-        requiredSubjects: ['PC101', 'REL250A', 'MATH110', 'ENG111'],
+        requiredSubjects: ['PC101', 'PC102', 'PC103', 'CSEPC110'],
+        creditRequirements: [
+            {
+                type: 'religion',
+                minCredits: 2,
+                description: 'Two Religion Courses'
+            }
+        ],
         status: 'not-requested' // not-requested, requested, received
     },
     {
         id: 'web-computer-programming',
         name: 'Web & Computer Programming Certificate',
-        requiredSubjects: ['CS111', 'WEB170', 'WEB230'],
+        requiredSubjects: ['CSEPC110', 'WDD130', 'CSE111', 'CSE210', 'WDD131', 'WDD231'],
         status: 'not-requested'
     },
     {
         id: 'web-development',
         name: 'Web Development Certificate',
-        requiredSubjects: ['WEB170', 'WEB230', 'WEB330', 'WEB340'],
+        requiredSubjects: ['ITM111', 'WDD330', 'CSE340', 'CSE341', 'WDD430'],
         status: 'not-requested'
     },
     {
         id: 'associate-degree',
         name: 'Associate Degree',
-        requiredSubjects: ['PC101', 'REL250A', 'MATH110', 'ENG111', 'CS111', 'WEB170', 'WEB230', 'WEB330'],
+        requiredSubjects: [],
+        creditRequirements: [
+            {
+                type: 'pathwayconnect',
+                minCredits: 7,
+                description: 'PathwayConnect Courses',
+                courses: ['PC101', 'PC102', 'PC103']
+            },
+            {
+                type: 'web-computer-programming-cert',
+                minCredits: 12,
+                description: 'Web & Computer Programming Certificate',
+                courses: ['CSEPC110', 'WDD130', 'CSE111', 'CSE210', 'WDD131', 'WDD231']
+            },
+            {
+                type: 'web-development-cert',
+                minCredits: 15,
+                description: 'Web Development Certificate',
+                courses: ['ITM111', 'WDD330', 'CSE340', 'CSE341', 'WDD430']
+            },
+            {
+                type: 'general-education',
+                minCredits: 11,
+                description: 'General Education Courses',
+                courses: ['PC103', 'GS170', 'MATH108X', 'WRIT101', 'BUS301']
+            },
+            {
+                type: 'religion-cornerstone',
+                minCredits: 4,
+                description: 'Religion Cornerstone Courses',
+                courses: ['REL200A', 'REL200B', 'REL225A', 'REL225B', 'REL250A', 'REL250B', 'REL275A', 'REL275B']
+            },
+            {
+                type: 'religion-elective',
+                minCredits: 4,
+                description: 'Religion Elective Courses',
+                courses: ['REL200A', 'REL200B', 'REL225A', 'REL225B', 'REL250A', 'REL250B', 'REL275A', 'REL275B', 'REL280A', 'REL280B', 'REL290A', 'REL290B', 'REL333A', 'REL333B'],
+                excludeUsedIn: ['religion-cornerstone']
+            }
+        ],
         status: 'not-requested'
     },
     {
         id: 'software-development',
         name: 'Software Development Certificate',
-        requiredSubjects: ['CS111', 'WEB170', 'WEB230', 'WEB330', 'WEB340', 'WEB430'],
+        requiredSubjects: ['CSE212', 'CSE270', 'CSE300', 'CSE310', 'CSE325', 'CSE370'],
         status: 'not-requested'
     },
     {
         id: 'bachelor-degree',
         name: "Bachelor's Degree",
-        requiredSubjects: ['PC101', 'REL250A', 'MATH110', 'ENG111', 'CS111', 'WEB170', 'WEB230', 'WEB330', 'WEB340', 'WEB430'],
+        requiredSubjects: ['BUS321', 'CSE499', 'FCS160', 'GESCI110', 'HUM110', 'PUBH132', 'PEACE101'],
+        requiredCertificates: ['associate-degree', 'software-development'],
+        creditRequirements: [
+            {
+                type: 'religion-cornerstone',
+                minCredits: 8,
+                description: 'Religion Cornerstone Courses',
+                courses: ['REL200A', 'REL200B', 'REL225A', 'REL225B', 'REL250A', 'REL250B', 'REL275A', 'REL275B']
+            },
+            {
+                type: 'religion-elective',
+                minCredits: 6,
+                description: 'Religion Elective Courses',
+                courses: ['REL200A', 'REL200B', 'REL225A', 'REL225B', 'REL250A', 'REL250B', 'REL275A', 'REL275B', 'REL280A', 'REL280B', 'REL290A', 'REL290B', 'REL333A', 'REL333B'],
+                excludeUsedIn: ['religion-cornerstone']
+            }
+        ],
         status: 'not-requested'
     }
 ];
 
-// Initialize app
-document.addEventListener('DOMContentLoaded', function () {
-    loadData();
-    updateStats();
-    renderSubjects();
-    renderCertificates();
-
-    // Add form event listener
-    document.getElementById('add-subject-form').addEventListener('submit', handleAddSubject);
-});
-
-// Data management functions
 function loadData() {
-    // Try to load from localStorage first (for backward compatibility)
     const savedSubjects = localStorage.getItem('studyTracker-subjects');
     const savedCertificates = localStorage.getItem('studyTracker-certificates');
 
     if (savedSubjects) {
         subjects = JSON.parse(savedSubjects);
-        // Add order property if it doesn't exist
         subjects.forEach((subject, index) => {
             if (subject.order === undefined) {
                 subject.order = index + 1;
@@ -493,7 +676,6 @@ function saveData() {
     localStorage.setItem('studyTracker-certificates', JSON.stringify(certificates));
 }
 
-// Tab navigation
 function showTab(tabName) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(tab => {
@@ -512,7 +694,6 @@ function showTab(tabName) {
     event.target.classList.add('active');
 }
 
-// Statistics functions
 function updateStats() {
     const totalCredits = subjects.reduce((sum, subject) => sum + subject.credits, 0);
     const earnedCredits = subjects
@@ -527,7 +708,6 @@ function updateStats() {
     document.getElementById('inProgressCredits').textContent = inProgressCredits;
 }
 
-// Subject functions
 function renderSubjects() {
     const container = document.getElementById('subjects-list');
     const statusFilter = document.getElementById('statusFilter').value;
@@ -535,7 +715,6 @@ function renderSubjects() {
 
     let filteredSubjects = [...subjects];
 
-    // Apply status filter
     if (statusFilter !== 'all') {
         filteredSubjects = filteredSubjects.filter(subject => subject.status === statusFilter);
     }
@@ -581,14 +760,39 @@ function renderSubjects() {
                         </button>
                     </div>
                 </div>
-                ${subject.prerequisites.length > 0 ? `
+                ${(Array.isArray(subject.prerequisites) && subject.prerequisites.length > 0) || (subject.prerequisites && typeof subject.prerequisites === 'object' && ((subject.prerequisites.courses && subject.prerequisites.courses.length > 0) || (subject.prerequisites.groups && subject.prerequisites.groups.length > 0))) ? `
                     <div class="prereqs">
-                        <strong>Prerequisites:</strong><br>
-                        ${prereqsInfo.map(prereq => `
-                            <span class="prereq-tag ${prereq.completed ? 'completed' : 'missing'}">
-                                ${prereq.code}
-                            </span>
-                        `).join('')}
+                        ${prereqsInfo.type === 'groups' ?
+                    prereqsInfo.groups.map((group, index) => {
+                        if (group.type === 'credits') {
+                            return `
+                                        <strong>Prerequisite ${index + 1} (Credits):</strong><br>
+                                        <span class="prereq-tag ${group.completed ? 'completed' : 'missing'}">
+                                            ${group.currentCredits}/${group.minCredits} credits earned
+                                        </span>
+                                        ${index < prereqsInfo.groups.length - 1 ? '<br><br>' : ''}
+                                    `;
+                        } else {
+                            return `
+                                        <strong>Prerequisite ${index + 1} ${group.type === 'any' ? '(ANY of)' : '(ALL of)'}:</strong><br>
+                                        ${group.courses.map(prereq => `
+                                            <span class="prereq-tag ${prereq.completed ? 'completed' : 'missing'}">
+                                                ${prereq.code}
+                                            </span>
+                                        `).join('')}
+                                        ${index < prereqsInfo.groups.length - 1 ? '<br><br>' : ''}
+                                    `;
+                        }
+                    }).join('')
+                    : `
+                                <strong>Prerequisites ${prereqsInfo.type === 'any' ? '(ANY of)' : '(ALL of)'}:</strong><br>
+                                ${prereqsInfo.courses.map(prereq => `
+                                    <span class="prereq-tag ${prereq.completed ? 'completed' : 'missing'}">
+                                        ${prereq.code}
+                                    </span>
+                                `).join('')}
+                            `
+                }
                     </div>
                 ` : ''}
                 ${!canStart ? `
@@ -601,23 +805,115 @@ function renderSubjects() {
     }).join('');
 }
 
+function getTotalCompletedCredits() {
+    return subjects.reduce((total, subject) => {
+        return total + (subject.status === 'completed' ? subject.credits : 0);
+    }, 0);
+}
+
 function canStartSubject(subject) {
     if (subject.status === 'completed') return true;
 
-    return subject.prerequisites.every(prereqCode => {
-        const prereqSubject = subjects.find(s => s.code === prereqCode);
-        return prereqSubject && prereqSubject.status === 'completed';
-    });
+    if (Array.isArray(subject.prerequisites)) {
+        return subject.prerequisites.every(prereqCode => {
+            const prereqSubject = subjects.find(s => s.code === prereqCode);
+            return prereqSubject && prereqSubject.status === 'completed';
+        });
+    }
+
+    if (subject.prerequisites && typeof subject.prerequisites === 'object') {
+        if (subject.prerequisites.type) {
+            const { type, courses } = subject.prerequisites;
+            if (type === 'any') {
+                return courses.some(prereqCode => {
+                    const prereqSubject = subjects.find(s => s.code === prereqCode);
+                    return prereqSubject && prereqSubject.status === 'completed';
+                });
+            } else if (type === 'all') {
+                return courses.every(prereqCode => {
+                    const prereqSubject = subjects.find(s => s.code === prereqCode);
+                    return prereqSubject && prereqSubject.status === 'completed';
+                });
+            }
+        } else if (subject.prerequisites.groups) {
+            return subject.prerequisites.groups.every(group => {
+                if (group.type === 'any') {
+                    return group.courses.some(prereqCode => {
+                        const prereqSubject = subjects.find(s => s.code === prereqCode);
+                        return prereqSubject && prereqSubject.status === 'completed';
+                    });
+                } else if (group.type === 'all') {
+                    return group.courses.every(prereqCode => {
+                        const prereqSubject = subjects.find(s => s.code === prereqCode);
+                        return prereqSubject && prereqSubject.status === 'completed';
+                    });
+                } else if (group.type === 'credits') {
+                    return getTotalCompletedCredits() >= group.minCredits;
+                }
+                return false;
+            });
+        }
+    }
+
+    return true;
 }
 
 function getPrerequisitesInfo(subject) {
-    return subject.prerequisites.map(prereqCode => {
-        const prereqSubject = subjects.find(s => s.code === prereqCode);
+    if (Array.isArray(subject.prerequisites)) {
         return {
-            code: prereqCode,
-            completed: prereqSubject ? prereqSubject.status === 'completed' : false
+            type: 'all',
+            courses: subject.prerequisites.map(prereqCode => {
+                const prereqSubject = subjects.find(s => s.code === prereqCode);
+                return {
+                    code: prereqCode,
+                    completed: prereqSubject ? prereqSubject.status === 'completed' : false
+                };
+            })
         };
-    });
+    }
+
+    if (subject.prerequisites && typeof subject.prerequisites === 'object') {
+        if (subject.prerequisites.groups) {
+            return {
+                type: 'groups',
+                groups: subject.prerequisites.groups.map(group => {
+                    if (group.type === 'credits') {
+                        return {
+                            type: 'credits',
+                            minCredits: group.minCredits,
+                            currentCredits: getTotalCompletedCredits(),
+                            completed: getTotalCompletedCredits() >= group.minCredits
+                        };
+                    } else {
+                        return {
+                            type: group.type,
+                            courses: group.courses.map(prereqCode => {
+                                const prereqSubject = subjects.find(s => s.code === prereqCode);
+                                return {
+                                    code: prereqCode,
+                                    completed: prereqSubject ? prereqSubject.status === 'completed' : false
+                                };
+                            })
+                        };
+                    }
+                })
+            };
+        } else if (subject.prerequisites.type && subject.prerequisites.courses) {
+            const { type, courses } = subject.prerequisites;
+            return {
+                type: type || 'all',
+                courses: courses.map(prereqCode => {
+                    const prereqSubject = subjects.find(s => s.code === prereqCode);
+                    return {
+                        code: prereqCode,
+                        completed: prereqSubject ? prereqSubject.status === 'completed' : false
+                    };
+                })
+            };
+        }
+    }
+
+    return { type: 'all', courses: [] };
 }
 
 function setSubjectStatus(subjectId, status) {
@@ -657,7 +953,6 @@ function filterSubjects() {
     renderSubjects();
 }
 
-// Certificate functions
 function renderCertificates() {
     const container = document.getElementById('certificates-list');
 
@@ -669,7 +964,7 @@ function renderCertificates() {
             <div class="certificate-card">
                 <div class="certificate-header">
                     <span class="certificate-name">${cert.name}</span>
-                    <span class="certificate-progress">${progress.completed}/${progress.total} subjects</span>
+                    <span class="certificate-progress">${progress.completed}/${progress.total} requirements</span>
                 </div>
                 <div class="certificate-subjects">
                     <h4>Required Subjects:</h4>
@@ -678,6 +973,40 @@ function renderCertificates() {
             const isCompleted = subject ? subject.status === 'completed' : false;
             return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${subjectCode}</span>`;
         }).join('')}
+                    
+                    ${progress.requiredCertificates ? `
+                        <h4>Required Certificates:</h4>
+                        ${progress.requiredCertificates.map(certId => {
+            const reqCert = certificates.find(c => c.id === certId);
+            if (!reqCert) return '';
+            const reqProgress = getCertificateProgress(reqCert);
+            const isCompleted = reqProgress.completed === reqProgress.total;
+            return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${reqCert.name}</span>`;
+        }).join('')}
+                    ` : ''}
+                    
+                    ${progress.creditRequirements ? `
+                        <h4>Credit Requirements:</h4>
+                        ${progress.creditRequirements.map(req => {
+            if (req.type === 'religion') {
+                const religionCredits = subjects
+                    .filter(s => s.code.startsWith('REL') && s.status === 'completed')
+                    .reduce((total, s) => total + s.credits, 0);
+                const isCompleted = religionCredits >= req.minCredits;
+                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${religionCredits}/${req.minCredits} credits</span>`;
+            } else if (req.type === 'religion-cornerstone' || req.type === 'religion-elective' ||
+                req.type === 'pathwayconnect' || req.type === 'web-computer-programming-cert' ||
+                req.type === 'web-development-cert' || req.type === 'general-education') {
+                const availableSubjects = subjects.filter(s =>
+                    req.courses.includes(s.code) && s.status === 'completed'
+                );
+                const creditsEarned = availableSubjects.reduce((total, s) => total + s.credits, 0);
+                const isCompleted = creditsEarned >= req.minCredits;
+                return `<span class="subject-requirement ${isCompleted ? 'completed' : ''}">${req.description}: ${creditsEarned}/${req.minCredits} credits</span>`;
+            }
+            return '';
+        }).join('')}
+                    ` : ''}
                 </div>
                 <div class="certificate-actions">
                     ${cert.status === 'not-requested' ? `
@@ -706,13 +1035,79 @@ function renderCertificates() {
 }
 
 function getCertificateProgress(certificate) {
-    const total = certificate.requiredSubjects.length;
-    const completed = certificate.requiredSubjects.filter(subjectCode => {
+    const courseTotal = certificate.requiredSubjects.length;
+    const courseCompleted = certificate.requiredSubjects.filter(subjectCode => {
         const subject = subjects.find(s => s.code === subjectCode);
         return subject && subject.status === 'completed';
     }).length;
 
-    return { completed, total };
+    let certTotal = 0;
+    let certCompleted = 0;
+
+    if (certificate.requiredCertificates) {
+        certTotal = certificate.requiredCertificates.length;
+        certCompleted = certificate.requiredCertificates.filter(certId => {
+            const cert = certificates.find(c => c.id === certId);
+            if (!cert) return false;
+            const progress = getCertificateProgress(cert);
+            return progress.completed === progress.total;
+        }).length;
+    }
+
+    let creditTotal = 0;
+    let creditCompleted = 0;
+    const usedCourses = new Set();
+
+    if (certificate.creditRequirements) {
+        creditTotal = certificate.creditRequirements.length;
+
+        // First pass: handle requirements that exclude others
+        const sortedReqs = certificate.creditRequirements.sort(req => req.excludeUsedIn ? -1 : 1);
+
+        creditCompleted = sortedReqs.filter(req => {
+            if (req.type === 'religion') {
+                const religionCredits = subjects
+                    .filter(s => s.code.startsWith('REL') && s.status === 'completed')
+                    .reduce((total, s) => total + s.credits, 0);
+                return religionCredits >= req.minCredits;
+            } else if (req.type === 'religion-cornerstone' || req.type === 'religion-elective' ||
+                req.type === 'pathwayconnect' || req.type === 'web-computer-programming-cert' ||
+                req.type === 'web-development-cert' || req.type === 'general-education') {
+                const availableSubjects = subjects.filter(s =>
+                    req.courses.includes(s.code) &&
+                    s.status === 'completed' &&
+                    !usedCourses.has(s.code)
+                );
+
+                const creditsEarned = availableSubjects.reduce((total, s) => total + s.credits, 0);
+
+                if (creditsEarned >= req.minCredits) {
+                    // Mark courses as used if this requirement excludes others
+                    if (!req.excludeUsedIn) {
+                        availableSubjects.forEach(s => usedCourses.add(s.code));
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }).length;
+    }
+
+    const totalRequirements = courseTotal + certTotal + creditTotal;
+    const completedRequirements = courseCompleted + certCompleted + creditCompleted;
+
+    return {
+        completed: completedRequirements,
+        total: totalRequirements,
+        courseCompleted,
+        courseTotal,
+        certCompleted,
+        certTotal,
+        creditCompleted,
+        creditTotal,
+        creditRequirements: certificate.creditRequirements,
+        requiredCertificates: certificate.requiredCertificates
+    };
 }
 
 function requestCertificate(certId) {
@@ -742,7 +1137,6 @@ function cancelCertificateRequest(certId) {
     renderCertificates();
 }
 
-// Add subject functionality
 function handleAddSubject(event) {
     event.preventDefault();
 
@@ -794,7 +1188,6 @@ function handleAddSubject(event) {
     alert('Subject added successfully!');
 }
 
-// Data import/export functions
 function exportData() {
     const data = {
         subjects: subjects,
@@ -862,7 +1255,6 @@ function resetData() {
     }
 }
 
-// New file-based storage functions
 function saveToFile() {
     const data = {
         subjects: subjects,
@@ -926,86 +1318,4 @@ function handleLoadFile(event) {
     reader.readAsText(file);
     // Clear the file input
     event.target.value = '';
-}
-
-// Placeholder management functions
-function showPlaceholderHelp() {
-    const helpText = `📝 HOW TO EDIT DEFAULT SUBJECTS:
-
-1. Open script.js file in any text editor
-2. Find the "defaultSubjects" array (around line 6-70)
-3. Each subject has these properties:
-   • id: unique identifier (lowercase, no spaces)
-   • code: subject code (e.g., "CS111")
-   • name: full subject name
-   • credits: number of credits (1-10)
-   • prerequisites: array of prerequisite codes
-   • order: number for custom sorting
-
-4. Example subject format:
-   {
-       id: 'math120',
-       code: 'MATH120',
-       name: 'Statistics',
-       credits: 3,
-       status: 'not-started',
-       prerequisites: ['MATH110'],
-       order: 11
-   }
-
-5. Save the file and refresh the app
-6. Use "Reset to Default Subjects" to load your changes
-
-⚠️ IMPORTANT:
-- Keep the same structure and format
-- Make sure prerequisite codes exist as subjects
-- Don't break the JavaScript syntax
-- Always backup your data first!`;
-
-    alert(helpText);
-}
-
-function resetToDefaults() {
-    if (confirm('This will reset all subjects to the default ones defined in script.js. Your current progress will be lost. Are you sure?')) {
-        if (confirm('This action cannot be undone. Make sure you have exported your data first!')) {
-            // Reset subjects to defaults while preserving any progress
-            const backupProgress = {};
-            subjects.forEach(subject => {
-                if (subject.status !== 'not-started') {
-                    backupProgress[subject.code] = subject.status;
-                }
-            });
-
-            // Load default subjects
-            subjects = JSON.parse(JSON.stringify(defaultSubjects));
-
-            // Restore progress for subjects that still exist
-            subjects.forEach(subject => {
-                if (backupProgress[subject.code]) {
-                    subject.status = backupProgress[subject.code];
-                }
-            });
-
-            // Reset certificates to defaults but preserve requests/received status
-            const backupCertStatus = {};
-            certificates.forEach(cert => {
-                if (cert.status !== 'not-requested') {
-                    backupCertStatus[cert.id] = cert.status;
-                }
-            });
-
-            certificates = JSON.parse(JSON.stringify(defaultCertificates));
-            certificates.forEach(cert => {
-                if (backupCertStatus[cert.id]) {
-                    cert.status = backupCertStatus[cert.id];
-                }
-            });
-
-            saveData();
-            updateStats();
-            renderSubjects();
-            renderCertificates();
-            alert('Subjects reset to defaults. Your progress has been preserved where possible.');
-        }
-    }
 }

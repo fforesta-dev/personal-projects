@@ -9,7 +9,17 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id="password-overlay" class="password-overlay">
+        <div class="password-container">
+            <h2>🔒 Study Tracker Access</h2>
+            <p>Enter password to access your study tracker:</p>
+            <input type="password" id="password-input" placeholder="Enter password...">
+            <button id="access-btn" onclick="checkPassword()" class="btn btn-primary">Access</button>
+            <div id="password-error" class="password-error"></div>
+        </div>
+    </div>
+
+    <div class="container" id="main-app" style="display: none;">
         <header>
             <h1>📚 Study Tracker</h1>
             <div class="stats">
@@ -35,7 +45,6 @@
         </nav>
 
         <main>
-            <!-- Subjects Tab -->
             <div id="subjects-tab" class="tab-content active">
                 <div class="controls">
                     <div class="filter-group">
@@ -55,19 +64,15 @@
                 </div>
 
                 <div id="subjects-list" class="subjects-grid">
-                    <!-- Subjects will be populated here -->
                 </div>
             </div>
 
-            <!-- Certificates Tab -->
             <div id="certificates-tab" class="tab-content">
                 <h2>Available Certificates</h2>
                 <div id="certificates-list" class="certificates-grid">
-                    <!-- Certificates will be populated here -->
                 </div>
             </div>
 
-            <!-- Manage Tab -->
             <div id="manage-tab" class="tab-content">
                 <div class="manage-section">
                     <h2>Add New Subject</h2>
@@ -106,17 +111,6 @@
                         onchange="handleImportFile(event)">
                     <input type="file" id="load-file" accept=".json" style="display: none;"
                         onchange="handleLoadFile(event)">
-                </div>
-
-                <div class="manage-section">
-                    <h2>Edit Placeholder Subjects</h2>
-                    <p class="edit-info">ℹ️ To modify the default subjects, edit the <code>defaultSubjects</code> array
-                        in script.js (lines 6-70).</p>
-                    <div class="button-group">
-                        <button onclick="showPlaceholderHelp()" class="btn btn-secondary">📝 Show Editing Guide</button>
-                        <button onclick="resetToDefaults()" class="btn btn-secondary">🔧 Reset to Default
-                            Subjects</button>
-                    </div>
                 </div>
             </div>
         </main>
