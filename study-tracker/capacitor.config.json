@@ -1,0 +1,11 @@
+{
+    "appId": "com.personal.studytracker",
+    "appName": "Study Tracker",
+    "webDir": ".",
+    "bundledWebRuntime": false,
+    "plugins": {
+        "SplashScreen": {
+            "launchShowDuration": 0
+        }
+    }
+}

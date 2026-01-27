@@ -1,67 +1,74 @@
-# Study Tracker iOS App Setup
+# Study Tracker iOS App Setup - Cloud Build
 
-Your study-tracker is now ready to become an iOS app! Follow these steps to deploy it to your iPhone.
+Build your Study Tracker as a native iOS app without needing Xcode! Uses Ionic Cloud Build.
 
 ## Prerequisites
-- Mac with Xcode installed (required for iOS development)
-- Node.js installed
-- An Apple Developer account (free tier works for personal use)
+- Node.js installed (https://nodejs.org)
+- Free Ionic account (https://ionic.io)
+- Apple Developer account (free tier works for personal apps)
 
 ## Setup Steps
 
-### 1. Initialize Capacitor (run from the study-tracker folder)
+### 1. Install Ionic CLI globally
 ```bash
-npm init -y
-npm install @capacitor/core @capacitor/cli
-npx cap init --web-dir . --npm-client npm
+npm install -g @ionic/cli
+```
+
+### 2. Navigate to your study-tracker folder
+```bash
+cd "C:\Users\Francesco\Documents\BYU\PERSONAL PROJECTS\personal-projects\study-tracker"
+```
+
+### 3. Install dependencies
+```bash
+npm install
+```
+
+### 4. Login to Ionic
+```bash
+ionic login
+```
+Enter your Ionic credentials (or create a free account at https://ionic.io/signup)
+
+### 5. Start Cloud Build
+```bash
+ionic cloud build --native ios
 ```
 
 When prompted:
-- **App name**: Study Tracker
-- **App Package ID**: com.personal.studytracker (or similar)
+- **Certificate signing request**: Create a new one
+- **Team ID**: Leave blank (will use your Apple Developer Team)
+- **Provisioning profile**: Select or create new
 
-### 2. Add iOS Platform
+### 6. Download the .ipa file
+After the build completes (5-15 minutes), you'll get an `.ipa` file.
+
+### 7. Install on iPhone using TestFlight
+1. Download the `.ipa` file to your computer
+2. Use **Apple Configurator 2** (free from App Store on Mac) or **Windows Device Portal** to install it
+3. Or email the `.ipa` to yourself and open it on your iPhone
+
+## Alternative: Quick TestFlight Upload
+If you have an Apple Developer account:
+1. Get the `.ipa` from the cloud build
+2. Use **Transporter** app to upload to TestFlight
+3. Share the TestFlight link with yourself
+
+## Updating Your App
+Edit your code, then run:
 ```bash
-npm install @capacitor/ios
-npx cap add ios
+ionic cloud build --native ios
 ```
-
-### 3. Open in Xcode
-```bash
-npx cap open ios
-```
-
-This will open Xcode with your iOS project.
-
-### 4. Configure in Xcode
-1. Select the project in the left sidebar
-2. Go to **Signing & Capabilities**
-3. Select your team (or create a free Apple Developer account)
-4. Change the bundle identifier if needed (com.personal.studytracker)
-
-### 5. Deploy to Your iPhone
-1. Connect your iPhone via USB
-2. In Xcode, select your device from the device dropdown (top left)
-3. Click the **Play** button to build and run on your device
-4. On your iPhone, trust the developer certificate:
-   - Go to **Settings > General > Device Management**
-   - Tap your Apple ID and trust the app
-
-## Syncing Changes
-Whenever you update your web code:
-```bash
-npx cap sync
-```
-Then rebuild in Xcode.
-
-## Adding Icons
-Replace images in `ios/App/App/Assets.xcassets/AppIcon.appiconset/` with your custom icons (various sizes provided by Xcode template).
 
 ## Notes
 - The app works offline thanks to the service worker
-- Your data is stored locally on your device
-- The password protection works on the iPhone app too
+- Your data stays on your device
+- Cloud builds are cached for faster rebuilds
+- Free tier has monthly build limits
 
 ---
 
-For more details, visit: https://capacitorjs.com/docs/getting-started
+**Troubleshooting**:
+- If build fails, check your Apple Developer certificates
+- Make sure your Bundle ID matches Apple's requirements (com.personal.studytracker)
+- For detailed help: https://ionic.io/docs/appflow/builds
