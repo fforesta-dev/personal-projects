@@ -1295,6 +1295,12 @@ function handleImportFile(event) {
 
             if (data.subjects && data.certificates) {
                 if (confirm('This will replace all your current data. Are you sure?')) {
+                    // Remove prerequisites from all RELxxxB religion classes
+                    data.subjects.forEach(subject => {
+                        if (/^REL\d{3}B$/.test(subject.code)) {
+                            subject.prerequisites = [];
+                        }
+                    });
                     subjects = data.subjects;
                     certificates = data.certificates;
                     saveData();
