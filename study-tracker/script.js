@@ -1301,6 +1301,8 @@ function handleImportFile(event) {
                             delete subject.prerequisites;
                         }
                     });
+                    // Debug: log all RELxxxB after import
+                    console.log('DEBUG: RELxxxB after import:', data.subjects.filter(s => /^REL\d{3}B$/.test(s.code)));
                     subjects = data.subjects;
                     certificates = data.certificates;
                     saveData();
