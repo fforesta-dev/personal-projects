@@ -1295,18 +1295,10 @@ function handleImportFile(event) {
 
             if (data.subjects && data.certificates) {
                 if (confirm('This will replace all your current data. Are you sure?')) {
-                    // Remove prerequisites from all RELxxxB religion classes
+                    // Remove prerequisites from all RELxxxB religion classes (array, object, or any type)
                     data.subjects.forEach(subject => {
                         if (/^REL\d{3}B$/.test(subject.code)) {
-                            subject.prerequisites = [];
-                        }
-                    });
-                    // Also handle case where prerequisites may be an object (from older backups)
-                    data.subjects.forEach(subject => {
-                        if (/^REL\d{3}B$/.test(subject.code)) {
-                            if (subject.prerequisites && typeof subject.prerequisites === 'object' && !Array.isArray(subject.prerequisites)) {
-                                subject.prerequisites = [];
-                            }
+                            delete subject.prerequisites;
                         }
                     });
                     subjects = data.subjects;
