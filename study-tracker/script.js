@@ -105,7 +105,7 @@ const defaultSubjects = [
         name: 'Jesus Christ & His Everlasting Gospel',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL250A'],
+        prerequisites: [],
         order: 4
     },
     {
@@ -168,7 +168,7 @@ const defaultSubjects = [
         name: 'Teachings and Doctrine of the Book of Mormon',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL275A'],
+        prerequisites: [],
         order: 11
     },
     {
@@ -234,7 +234,7 @@ const defaultSubjects = [
         name: 'Foundations of the Restoration',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL225A'],
+        prerequisites: [],
         order: 18
     },
     {
@@ -302,7 +302,7 @@ const defaultSubjects = [
         name: 'The Eternal Family',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL200A'],
+        prerequisites: [],
         order: 24
     },
     {
@@ -367,7 +367,7 @@ const defaultSubjects = [
         name: 'Teachings of the Living Prophets',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL333A'],
+        prerequisites: [],
         order: 30
     },
     {
@@ -464,7 +464,7 @@ const defaultSubjects = [
         name: 'The Divine Gift of Forgiveness',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL290A'],
+        prerequisites: [],
         order: 38
     },
     {
@@ -520,7 +520,7 @@ const defaultSubjects = [
         name: 'Answering My Gospel Questions',
         credits: 1,
         status: 'not-started',
-        prerequisites: ['REL280A'],
+        prerequisites: [],
         order: 43
     },
     {
