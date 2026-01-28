@@ -1301,6 +1301,14 @@ function handleImportFile(event) {
                             subject.prerequisites = [];
                         }
                     });
+                    // Also handle case where prerequisites may be an object (from older backups)
+                    data.subjects.forEach(subject => {
+                        if (/^REL\d{3}B$/.test(subject.code)) {
+                            if (subject.prerequisites && typeof subject.prerequisites === 'object' && !Array.isArray(subject.prerequisites)) {
+                                subject.prerequisites = [];
+                            }
+                        }
+                    });
                     subjects = data.subjects;
                     certificates = data.certificates;
                     saveData();
